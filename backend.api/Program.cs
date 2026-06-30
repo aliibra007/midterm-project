@@ -22,7 +22,7 @@ var dbUrl  = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (!string.IsNullOrEmpty(pgHost))
 {
-    // Render: database linked to service — PG* vars are auto-injected
+    // Render: PG* vars injected automatically when database is linked to the service
     connStr = $"Host={pgHost};" +
               $"Port={Environment.GetEnvironmentVariable("PGPORT") ?? "5432"};" +
               $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};" +
@@ -32,10 +32,24 @@ if (!string.IsNullOrEmpty(pgHost))
 }
 else if (!string.IsNullOrEmpty(dbUrl))
 {
-    // Render: DATABASE_URL set manually — convert postgres:// to postgresql:// for Npgsql
-    if (dbUrl.StartsWith("postgres://"))
-        dbUrl = "postgresql://" + dbUrl["postgres://".Length..];
-    connStr = dbUrl;
+    // Parse postgres:// URI manually — Npgsql's URI parser rejects Render's URL format
+    try
+    {
+        var uri = new Uri(dbUrl.Replace("postgres://", "http://").Replace("postgresql://", "http://"));
+        var parts    = uri.UserInfo.Split(':', 2);
+        var user     = parts[0];
+        var password = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : "";
+        var host     = uri.Host;
+        var pgPort   = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+        connStr = $"Host={host};Port={pgPort};Database={database};" +
+                  $"Username={user};Password={password};" +
+                  "SSL Mode=Require;Trust Server Certificate=true";
+    }
+    catch
+    {
+        connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
+    }
 }
 else
 {
