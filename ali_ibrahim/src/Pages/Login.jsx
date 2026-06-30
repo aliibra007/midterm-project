@@ -45,7 +45,7 @@ function Login({ setuser, user }) {
             else nav("/admin");
 
         } catch {
-            seterror("Could not reach the server — make sure the backend is running on port 5200.");
+            seterror("Could not reach the server. Please try again in a moment.");
         } finally {
             setloading(false);
         }
