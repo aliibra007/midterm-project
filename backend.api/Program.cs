@@ -69,10 +69,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ── Seed default admin ────────────────────────────────────────────────────────
-using (var scope = app.Services.CreateScope())
+// ── Migrate + seed default admin ─────────────────────────────────────────────
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); // applies any pending migrations automatically on Render
     if (!db.Admins.Any())
     {
         db.Admins.Add(new backend.api.Models.Admin
@@ -83,6 +85,11 @@ using (var scope = app.Services.CreateScope())
         });
         db.SaveChanges();
     }
+}
+catch (Exception ex)
+{
+    // Log but don't crash — the app can still start even if seed fails
+    Console.WriteLine($"[Startup] DB seed failed: {ex.Message}");
 }
 
 // ── Dev tools ─────────────────────────────────────────────────────────────────
