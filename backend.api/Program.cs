@@ -21,6 +21,10 @@ if (!string.IsNullOrEmpty(port))
 var connStr = Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Render provides postgres:// but Npgsql requires postgresql://
+if (connStr != null && connStr.StartsWith("postgres://"))
+    connStr = "postgresql://" + connStr["postgres://".Length..];
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
 
