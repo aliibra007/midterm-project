@@ -40,7 +40,8 @@ else if (!string.IsNullOrEmpty(dbUrl))
         var user     = parts[0];
         var password = parts.Length > 1 ? Uri.UnescapeDataString(parts[1]) : "";
         var host     = uri.Host;
-        var pgPort   = uri.Port > 0 ? uri.Port : 5432;
+        // uri.Port returns 80 (http default) when no port is in the URL — use 5432 as the PG default
+        var pgPort   = (uri.Port > 0 && uri.Port != 80) ? uri.Port : 5432;
         var database = uri.AbsolutePath.TrimStart('/');
         connStr = $"Host={host};Port={pgPort};Database={database};" +
                   $"Username={user};Password={password};" +
