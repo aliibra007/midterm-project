@@ -1,0 +1,18 @@
+# .NET build output
+backend.api/bin/
+backend.api/obj/
+
+# Local secrets — never commit these
+backend.api/appsettings.Development.json
+
+# Node / Vite
+ali_ibrahim/node_modules/
+ali_ibrahim/dist/
+
+# Local env overrides (Vercel sets VITE_API_URL in the dashboard)
+ali_ibrahim/.env.local
+ali_ibrahim/.env.production
+
+# OS junk
+.DS_Store
+Thumbs.db
