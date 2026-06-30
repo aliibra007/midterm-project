@@ -16,17 +16,31 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // ── Database ──────────────────────────────────────────────────────────────────
-// Render injects individual PG* vars — build a proper Npgsql key=value string from them.
-// Falls back to appsettings.json for local dev.
+string connStr;
 var pgHost = Environment.GetEnvironmentVariable("PGHOST");
-var connStr = !string.IsNullOrEmpty(pgHost)
-    ? $"Host={pgHost};" +
-      $"Port={Environment.GetEnvironmentVariable("PGPORT") ?? "5432"};" +
-      $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};" +
-      $"Username={Environment.GetEnvironmentVariable("PGUSER")};" +
-      $"Password={Environment.GetEnvironmentVariable("PGPASSWORD")};" +
-      $"SSL Mode=Require;Trust Server Certificate=true"
-    : builder.Configuration.GetConnectionString("DefaultConnection");
+var dbUrl  = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(pgHost))
+{
+    // Render: database linked to service — PG* vars are auto-injected
+    connStr = $"Host={pgHost};" +
+              $"Port={Environment.GetEnvironmentVariable("PGPORT") ?? "5432"};" +
+              $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};" +
+              $"Username={Environment.GetEnvironmentVariable("PGUSER")};" +
+              $"Password={Environment.GetEnvironmentVariable("PGPASSWORD")};" +
+              "SSL Mode=Require;Trust Server Certificate=true";
+}
+else if (!string.IsNullOrEmpty(dbUrl))
+{
+    // Render: DATABASE_URL set manually — convert postgres:// to postgresql:// for Npgsql
+    if (dbUrl.StartsWith("postgres://"))
+        dbUrl = "postgresql://" + dbUrl["postgres://".Length..];
+    connStr = dbUrl;
+}
+else
+{
+    connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
