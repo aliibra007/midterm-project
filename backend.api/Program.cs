@@ -16,14 +16,17 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // ── Database ──────────────────────────────────────────────────────────────────
-// Railway sets DATABASE_URL as a postgresql:// URI — Npgsql reads that format directly.
-// Locally we fall back to the connection string in appsettings.json.
-var connStr = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Render provides postgres:// but Npgsql requires postgresql://
-if (connStr != null && connStr.StartsWith("postgres://"))
-    connStr = "postgresql://" + connStr["postgres://".Length..];
+// Render injects individual PG* vars — build a proper Npgsql key=value string from them.
+// Falls back to appsettings.json for local dev.
+var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+var connStr = !string.IsNullOrEmpty(pgHost)
+    ? $"Host={pgHost};" +
+      $"Port={Environment.GetEnvironmentVariable("PGPORT") ?? "5432"};" +
+      $"Database={Environment.GetEnvironmentVariable("PGDATABASE")};" +
+      $"Username={Environment.GetEnvironmentVariable("PGUSER")};" +
+      $"Password={Environment.GetEnvironmentVariable("PGPASSWORD")};" +
+      $"SSL Mode=Require;Trust Server Certificate=true"
+    : builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connStr));
