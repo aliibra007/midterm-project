@@ -1,0 +1,112 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+/* ── Welcome ── */
+
+.welcome-section {
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.welcome-section h1 {
+    font-family: var(--font-display);
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--clr-text);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.welcome-section h1 span {
+    color: var(--clr-accent);
+}
+
+.welcome-section p {
+    color: var(--clr-muted);
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+/* ── Stat Cards ── */
+
+.stat-card {
+    background: var(--clr-surface);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--clr-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--clr-accent), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.stat-card:hover {
+    border-color: var(--clr-border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
+}
+
+.stat-card .label {
+    font-size: 0.8125rem;
+    color: var(--clr-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.stat-card .value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.stat-card .trend {
+    font-size: 0.8125rem;
+    color: var(--clr-success);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ── Chart Area Placeholder ── */
+
+.chart-card {
+    background: var(--clr-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--clr-border);
+    padding: 1.5rem;
+    grid-column: span 2;
+}
+
+.chart-card h3 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--clr-text);
+    margin-bottom: 1.25rem;
+}
