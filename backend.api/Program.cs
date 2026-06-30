@@ -53,15 +53,15 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-// AllowedOrigins in appsettings.json holds the default (localhost).
-// On Railway, override with environment variable:  AllowedOrigins__0=https://your-app.vercel.app
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-    ?? ["http://localhost:5173"];
+// Set ALLOWED_ORIGIN env var on Render to your Vercel URL.
+// Falls back to localhost for local dev.
+var allowedOrigin = Environment.GetEnvironmentVariable("ALLOWED_ORIGIN")
+    ?? "http://localhost:5173";
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins(allowedOrigin)
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
